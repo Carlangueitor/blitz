@@ -1,9 +1,9 @@
 package blitz
 
 type Config struct {
-	Port string `mapstructure:"PORT"`
+	Port int `mapstructure:"PORT"`
 }
 
 type ConfigLoader interface {
-	Load() Config
+	Load() (*Config, error)
 }
