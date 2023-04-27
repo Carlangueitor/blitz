@@ -6,11 +6,13 @@ import (
 	"github.com/carlangueitor/blitz"
 )
 
+const defaultPort = 4000
+
 type ViperConfigLoader struct {
 }
 
 func (loader *ViperConfigLoader) Load() (*blitz.Config, error) {
-	viper.SetDefault("port", 4000)
+	viper.SetDefault("port", defaultPort)
 	viper.SetEnvPrefix("blitz")
 	viper.AutomaticEnv()
 
