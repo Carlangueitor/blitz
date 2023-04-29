@@ -2,47 +2,27 @@ package main
 
 import (
 	"fmt"
-	// "net/http"
-
-	// "github.com/gobwas/ws"
-	// "github.com/gobwas/ws/wsutil"
+	"log"
 
 	"github.com/carlangueitor/blitz"
 	"github.com/carlangueitor/blitz/configloader"
+	"github.com/carlangueitor/blitz/websocket"
 )
 
-func start(configLoader blitz.ConfigLoader) {
+func start(configLoader blitz.ConfigLoader, server blitz.Server) {
 	config, err := configLoader.Load()
 	if err != nil {
 		fmt.Printf("Error loading config: %s", err)
 	}
 
-	fmt.Printf("Config Loaded: %+v", config)
+	fmt.Printf("Config Loaded: %+v\n", config)
 
-	// http.ListenAndServe(":8000", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	fmt.Printf("Serving at %d", config.Port)
-	// 	conn, _, _, err := ws.UpgradeHTTP(r, w)
-	// 	if err != nil {
-	// 		// handle error
-	// 	}
-	// 	go func() {
-	// 		defer conn.Close()
-	//
-	// 		for {
-	// 			msg, op, err := wsutil.ReadClientData(conn)
-	// 			if err != nil {
-	// 				// handle error
-	// 			}
-	// 			err = wsutil.WriteServerMessage(conn, op, msg)
-	// 			if err != nil {
-	// 				// handle error
-	// 			}
-	// 		}
-	// 	}()
-	// }))
+	server.SetConfig(config)
+	log.Fatal(server.Start())
 }
 
 func main() {
 	viperConfigLoader := configloader.ViperConfigLoader{}
-	start(&viperConfigLoader)
+	webSocketServer := websocket.Server{}
+	start(&viperConfigLoader, &webSocketServer)
 }
