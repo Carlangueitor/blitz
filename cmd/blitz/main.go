@@ -18,7 +18,10 @@ func start(configLoader blitz.ConfigLoader, server blitz.Server) {
 	fmt.Printf("Config Loaded: %+v\n", config)
 
 	server.SetConfig(config)
-	log.Fatal(server.Start())
+	err = server.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {

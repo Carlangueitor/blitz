@@ -10,10 +10,10 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	mockCtl := gomock.NewController(t)
-	defer mockCtl.Finish()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
-	configLoader := mocks.NewMockConfigLoader(mockCtl)
+	configLoader := mocks.NewMockConfigLoader(mockCtrl)
 	config := &blitz.Config{
 		Port: 1000,
 	}
@@ -24,5 +24,16 @@ func TestStart(t *testing.T) {
 		Return(config, nil).
 		Times(1)
 
-	start(configLoader)
+	server := mocks.NewMockServer(mockCtrl)
+	server.
+		EXPECT().
+		SetConfig(config).
+		Times(1)
+	server.
+		EXPECT().
+		Start().
+		Return(nil).
+		Times(1)
+
+	start(configLoader, server)
 }
