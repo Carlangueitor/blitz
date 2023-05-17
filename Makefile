@@ -25,3 +25,6 @@ generate:
 
 build:
 	docker build -t blitz .
+
+docker-up:
+	docker compose up

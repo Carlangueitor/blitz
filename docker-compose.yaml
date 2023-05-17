@@ -1,0 +1,6 @@
+version: '3.2'
+services:
+  blitz:
+    image: blitz
+    ports:
+      - 4500:4000
