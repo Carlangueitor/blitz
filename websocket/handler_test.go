@@ -2,6 +2,9 @@ package websocket
 
 import (
 	"context"
+	"encoding/json"
+	"net"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -9,29 +12,40 @@ import (
 	"github.com/gobwas/ws/wsutil"
 )
 
-func TestWebSocketHandler_ServeHTTP(t *testing.T) {
-	handler := webSocketHandler{}
-
-	// Create a test server with the WebSocket handler
+func newServer(handler http.Handler) (*httptest.Server, string) {
 	server := httptest.NewServer(handler)
+	url := "ws" + server.URL[4:]
+	return server, url
+}
+
+func getConnection(t *testing.T, handler http.Handler) (*httptest.Server, net.Conn) {
+	server, url := newServer(handler)
+
+	conn, _, _, err := ws.Dial(context.Background(), url)
+	if err != nil {
+		t.Fatalf("Failed to dial WebSocket: %v", err)
+	}
+
+	return server, conn
+}
+
+func TestWebSocketHandlerServeHTTPUpgradeConnection(t *testing.T) {
+	handler := webSocketHandler{}
+	server, url := newServer(handler)
 	defer server.Close()
 
-	// Create a WebSocket connection to the test server
-	url := "ws" + server.URL[4:]
 	conn, _, _, err := ws.Dial(context.Background(), url)
 	if err != nil {
 		t.Fatalf("Failed to dial WebSocket: %v", err)
 	}
 	defer conn.Close()
+}
 
-	// Write a message to the WebSocket connection
-	message := []byte("Hello, WebSocket!")
-	err = wsutil.WriteClientText(conn, message)
-	if err != nil {
-		t.Fatalf("Failed to write message to WebSocket: %v", err)
-	}
+func TestWebSocketHandlerGetSuscriberID(t *testing.T) {
+	server, conn := getConnection(t, NewWebSocketHandler())
+	defer server.Close()
+	defer conn.Close()
 
-	// Read the server's response from the WebSocket connection
 	msg, op, err := wsutil.ReadServerData(conn)
 	if err != nil {
 		t.Fatalf("Failed to read server data from WebSocket: %v", err)
@@ -41,8 +55,21 @@ func TestWebSocketHandler_ServeHTTP(t *testing.T) {
 		t.Errorf("Unexpected message type. Expected: %v, Got: %v", ws.OpText, op)
 	}
 
-	response := msg
-	if string(response) != string(message) {
-		t.Errorf("Unexpected message. Expected: %s, Got: %s", message, response)
+	response := message{}
+	err = json.Unmarshal(msg, &response)
+	if err != nil {
+		t.Fatalf("Received non valid JSON: %v", err)
 	}
+
+	if response.Op != OpSubscribeId {
+		t.Errorf("Unexpected message Op. Expected: %s, Got: %s", OpSubscribeId, response.Op)
+	}
+}
+
+func TestWebSocketHandlerJSONParsing(t *testing.T) {
+	handler := webSocketHandler{}
+	server, conn := getConnection(t, handler)
+	defer server.Close()
+	defer conn.Close()
+
 }
