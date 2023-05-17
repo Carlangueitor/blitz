@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/carlangueitor/blitz"
@@ -17,9 +18,9 @@ func (server *Server) SetConfig(config *blitz.Config) {
 
 func (server Server) Start() error {
 	mux := http.NewServeMux()
-	mux.Handle("/", webSocketHandler{})
+	mux.Handle("/", NewWebSocketHandler())
 
-	fmt.Printf("Serve config %v\n", server)
+	log.Printf("Serve config %v\n", server)
 
 	listenAddr := fmt.Sprintf(":%d", server.config.Port)
 	err := http.ListenAndServe(listenAddr, mux)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/carlangueitor/blitz"
@@ -12,10 +11,10 @@ import (
 func start(configLoader blitz.ConfigLoader, server blitz.Server) {
 	config, err := configLoader.Load()
 	if err != nil {
-		fmt.Printf("Error loading config: %s", err)
+		log.Printf("Error loading config: %s\n", err)
 	}
 
-	fmt.Printf("Config Loaded: %+v\n", config)
+	log.Printf("Config Loaded: %+v\n", config)
 
 	server.SetConfig(config)
 	err = server.Start()
