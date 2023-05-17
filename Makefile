@@ -22,3 +22,6 @@ watch-n-serve:
 
 generate:
 	go generate ./...
+
+build:
+	docker build -t blitz .
